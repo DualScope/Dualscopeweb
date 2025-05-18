@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DS Films</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #1C1C1C;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            position: fixed;
+            width: 100%;
+            z-index: 100;
+            transition: background-color 0.3s ease, box-shadow 0.3s;
+        }
+        
+        nav.scrolled {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            border-radius: 32px;
+            margin: 16px auto 0 auto;
+            width: calc(100% - 48px);
+            left: 0;
+            right: 0;
+            /* floating island effect */
+        }
+        
+        .logo {
+            height: 60px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo img {
+            height: 100%;
+            width: auto;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: background 0.3s, box-shadow 0.3s;
+            padding: 0.5rem 1.2rem;
+            border-radius: 24px;
+            position: relative;
+        }
+        
+        .nav-links a:hover {
+            color: #ffffff; /* keep text white on hover */
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.10);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .icon-button {
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(8px);
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 400;
+            border: none;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.10);
+            transition: background 0.3s, box-shadow 0.3s, color 0.3s;
+            text-transform: none;
+            letter-spacing: normal;
+            padding: 0;
+        }
+        
+        .icon-button:hover {
+            background: rgba(255,255,255,0.28);
+            color: #ffffff;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+        
+        /* Video Slider */
+        .video-slider {
+            height: 100vh;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            background: #1C1C1C;
+        }
+        
+        .slider-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease;
+            z-index: 1;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            z-index: 2;
+        }
+        
+        .slide-bg-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .slide-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5));
+            z-index: 3;
+        }
+        
+        .slide-content {
+            position: absolute;
+            top: 58%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 4;
+            width: 80%;
+        }
+        
+        .slide-title {
+            font-size: 6rem; /* bigger */
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 3rem; /* more space below */
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            margin-top: 3rem; /* lower on the slide */
+        }
+        
+        .slide-description {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 1.2rem 2.8rem; /* bigger */
+            font-size: 1.5rem;      /* bigger */
+            font-weight: 600;
+            text-decoration: none;
+            color: #111;
+            background-color: #ffffff;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            margin-top: 2.5rem; /* lower */
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.4);
+        }
+        
+        /* Slider Arrows */
+        .slider-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            font-size: 2rem;
+            color: white;
+            background: rgba(0, 0, 0, 0.3);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50px; /* changed from 50% to 50px for consistency */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .slider-arrow:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .slider-prev {
+            left: 20px;
+        }
+        
+        .slider-next {
+            right: 20px;
+        }
+        
+        /* Portfolio Page */
+        .page {
+            min-height: 100vh;
+            padding: 150px 5% 100px;
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .page-title {
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+        
+        /* Portfolio Page */
+        .portfolio-menu {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+        
+        .portfolio-menu button {
+            background: none;
+            border: 1px solid #ffffff;
+            color: #ffffff;
+            padding: 0.5rem 1.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 50px; /* added for round corners */
+            transition: all 0.3s ease;
+        }
+        
+        .portfolio-menu button.active {
+            background-color: #ffffff;
+            color: #0a0a0a;
+        }
+        
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .portfolio-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            cursor: pointer;
+            height: 300px;
+            display: none;
+        }
+        
+        .portfolio-item.show {
+            display: block;
+        }
+        
+        .portfolio-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .portfolio-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        .portfolio-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+        
+        .portfolio-item:hover .portfolio-overlay {
+            opacity: 1;
+        }
+        
+        .portfolio-overlay h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .portfolio-overlay p {
+            font-size: 0.9rem;
+            color: #ddd;
+        }
+        
+        /* About Page */
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        
+        .about-content p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .team-member {
+            text-align: center;
+        }
+        
+        .team-member img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border-radius: 18px; /* Add this for rounded corners */
+        }
+        
+        .team-member h3 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .team-member p {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        /* Contact Page */
+        .contact-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .contact-info {
+            margin-bottom: 3rem;
+        }
+        
+        .contact-info h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .contact-info p {
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact-form {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            padding: 1rem;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border-radius: 5px;
+        }
+        
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            padding: 1rem;
+            background-color: #ffffff;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 50px; /* changed from 5px to 50px for round corners */
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            background-color: #f0f0f0;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #252424;
+            padding: 3rem;
+            text-align: center;
+            border-top: none;
+            border-radius: 32px 32px 0 0;
+            margin: 32px auto 0 auto;
+            width: calc(100% - 48px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-links a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: #9dffa0;
+        }
+        
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .social-icon {
+            color: white;
+            font-size: 1.2rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s ease;
+        }
+        
+        .social-icon:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        footer .social-icon svg {
+            display: block;
+            margin: auto;
+        }
+        
+        .copyright {
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        /* Hide footer on home page */
+        body.home-active footer {
+            display: none !important;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem 1.5rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .nav-links.active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 80px;
+                left: 0;
+                width: 100%;
+                background-color: rgba(0, 0, 0, 0.9);
+                padding: 2rem;
+            }
+            
+            .slide-title {
+                font-size: 3rem;
+            }
+            
+            .page {
+                padding: 100px 5% 50px;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <a href="#home" class="logo">
+            <img src="images/logo white.png" alt="Company Logo" style="height: 60px; width: auto;">
+        </a>
+        <div class="nav-links">
+            <a href="#home" class="nav-link active">Home</a>
+            <a href="#portfolio" class="nav-link">Portfolio</a>
+            <a href="#about" class="nav-link">About Us</a>
+            <a href="#contact" class="nav-link">Contact</a>
+        </div>
+        <div class="nav-buttons">
+            <button class="icon-button" id="lang-toggle-btn">EN</button>
+        </div>
+    </nav>
+    
+    <!-- Home Page with Video Slider -->
+    <section id="home" class="video-slider">
+        <div class="slider-container">
+            <div class="slide active">
+                <video class="slide-bg-video" autoplay muted loop playsinline>
+                    <source src="videos/1.mp4" type="video/mp4">
+                </video>
+                <div class="slide-overlay"></div>
+                <div class="slide-content">
+                    <h1 class="slide-title">CINEMATIC EXCELLENCE</h1>
+                    <p class="slide-description">Crafting visual stories that captivate and inspire audiences worldwide.</p>
+                    <a href="#portfolio" class="cta-button" id="view-our-work-btn">View Our Work</a>
+                </div>
+            </div>
+            
+            <div class="slide">
+                <video class="slide-bg-video" autoplay muted loop playsinline>
+                    <source src="videos/2.mp4" type="video/mp4">
+                </video>
+                <div class="slide-overlay"></div>
+                <div class="slide-content">
+                    <h1 class="slide-title">VISUAL STORYTELLING</h1>
+                    <p class="slide-description">Every frame tells a story. Every scene captures an emotion.</p>
+                    <a href="#portfolio" class="cta-button" id="explore-projects-btn">Explore Projects</a>
+                </div>
+            </div>
+            
+            <div class="slide">
+                <video class="slide-bg-video" autoplay muted loop playsinline>
+                    <source src="videos/3.mp4" type="video/mp4">
+                </video>
+                <div class="slide-overlay"></div>
+                <div class="slide-content">
+                    <h1 class="slide-title">AWARD-WINNING FILMS</h1>
+                    <p class="slide-description">Recognized globally for our innovative approach to filmmaking.</p>
+                    <a href="#contact" class="cta-button" id="work-with-us-btn">Work With Us</a>
+                </div>
+            </div>
+        </div>
+        
+        <button class="slider-arrow slider-prev">❮</button>
+        <button class="slider-arrow slider-next">❯</button>
+    </section>
+    
+    <!-- Portfolio Page -->
+    <section id="portfolio" class="page">
+        <h2 class="page-title">Our Portfolio</h2>
+        
+        <div class="portfolio-menu">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="films">Films</button>
+            <button class="filter-btn" data-filter="commercials">Commercials</button>
+            <button class="filter-btn" data-filter="documentaries">Documentaries</button>
+            <button class="filter-btn" data-filter="music-videos">Music Videos</button>
+        </div>
+        
+        <div class="portfolio-grid">
+            <div class="portfolio-item show" data-category="films">
+                <img src="/api/placeholder/600/600" alt="Portfolio item">
+                <div class="portfolio-overlay">
+                    <h3>The Last Journey</h3>
+                    <p>Feature Film, 2024</p>
+                </div>
+            </div>
+            <div class="portfolio-item show" data-category="commercials">
+                <img src="/api/placeholder/600/600" alt="Portfolio item">
+                <div class="portfolio-overlay">
+                    <h3>Ocean View Resort</h3>
+                    <p>Commercial, 2024</p>
+                </div>
+            </div>
+            <div class="portfolio-item show" data-category="documentaries">
+                <img src="/api/placeholder/600/600" alt="Portfolio item">
+                <div class="portfolio-overlay">
+                    <h3>Wild Nature</h3>
+                    <p>Documentary, 2023</p>
+                </div>
+            </div>
+            <div class="portfolio-item show" data-category="music-videos">
+                <img src="/api/placeholder/600/600" alt="Portfolio item">
+                <div class="portfolio-overlay">
+                    <h3>Electric Dreams</h3>
+                    <p>Music Video, 2024</p>
+                </div>
+            </div>
+            <div class="portfolio-item show" data-category="films">
+                <img src="/api/placeholder/600/600" alt="Portfolio item">
+                <div class="portfolio-overlay">
+                    <h3>Midnight City</h3>
+                    <p>Short Film, 2023</p>
+                </div>
+            </div>
+            <div class="portfolio-item show" data-category="commercials">
+                <img src="/api/placeholder/600/600" alt="Portfolio item">
+                <div class="portfolio-overlay">
+                    <h3>Urban Style</h3>
+                    <p>Fashion Commercial, 2024</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- About Us Page -->
+    <section id="about" class="page">
+        <h2 class="page-title">About DS Films</h2>
+        
+        <div class="about-content">
+            <p>HDS Films is a creative production company founded in 2015, specializing in high-quality film production across various formats. We bring stories to life through cinematic excellence and innovative visual storytelling.</p>
+            
+            <p>With a team of passionate filmmakers, cinematographers, and editors, we've created award-winning content for clients worldwide. Our mission is to craft visual experiences that resonate with audiences and leave a lasting impression.</p>
+            
+            <p>We believe in the power of visual storytelling to inspire, educate, and entertain. Every project we undertake is approached with creativity, technical expertise, and dedication to our craft.</p>
+            
+            <div class="team-grid">
+                <div class="team-member">
+                    <img src="images/membros/tiago.JPEG" alt="Tiago" style="width:200px;height:200px;object-fit:cover;border-radius:18px;" onerror="this.onerror=null;this.src='images/membros/tiago.JPG';">
+                    <h3>Jo</h3>
+                    <p>Creative Director</p>
+                </div>
+                <div class="team-member">
+                    <img src="images/membros/manel.JPEG" alt="Manel" style="width:200px;height:200px;object-fit:cover;border-radius:18px;" onerror="this.onerror=null;this.src='images/membros/manel.JPG';">
+                    <h3>David Schmidt</h3>
+                    <p>Head of Production</p>
+                </div>
+                <div class="team-member">
+                    <img src="images/membros/joão.jpg" alt="João" style="width:200px;height:200px;object-fit:cover;border-radius:18px;" onerror="this.onerror=null;this.src='images/membros/joão.JPG';">
+                    <h3>Sarah Winters</h3>
+                    <p>Cinematographer</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Contact Page -->
+    <section id="contact" class="page">
+        <h2 class="page-title">Contact Us</h2>
+        
+        <div class="contact-content">
+            <div class="contact-info">
+                <h3>Get In Touch</h3>
+                <p>We're always looking for new projects and collaborations.</p>
+                <p>Email: info@hdsfilms.com</p>
+                <p>Phone: 919269882</p>
+                <p>Address: Leiria, Portugal</p>
+            </div>
+            
+            <form class="contact-form">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject">
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Send Message</button>
+            </form>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="footer-links">
+            <a href="#home" class="footer-link">Home</a>
+            <a href="#portfolio" class="footer-link">Portfolio</a>
+            <a href="#about" class="footer-link">About Us</a>
+            <a href="#contact" class="footer-link">Contact</a>
+            <!-- Removed Privacy Policy link -->
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+            <strong>Have an idea? Contact us:</strong>
+            <div>
+                <a href="mailto:info@dsfilms.com" style="color:#9dffa0;text-decoration:none;font-weight:600;">info@dsfilms.com</a>
+            </div>
+        </div>
+        <div class="social-icons">
+            <a href="mailto:info@dsfilms.com" class="social-icon" title="Email">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20"><path d="M2.94 4.94A2.5 2.5 0 0 1 4.5 4h11a2.5 2.5 0 0 1 1.56.53l-7.06 6.13-7.06-6.13zm-.94.97v8.09l5.8-5.04-5.8-3.05zm1.4 9.09A2.5 2.5 0 0 0 4.5 16h11a2.5 2.5 0 0 0 2.5-2.5v-8.09l-5.8 5.04 5.8 3.05zm7.6-5.96 7.06-6.13A2.5 2.5 0 0 0 15.5 4h-11a2.5 2.5 0 0 0-1.56.53l7.06 6.13z"/></svg>
+            </a>
+            <a href="#" class="social-icon" title="Facebook">f</a>
+            <a href="#" class="social-icon" title="LinkedIn">in</a>
+            <a href="#" class="social-icon" title="Instagram">ig</a>
+            <a href="#" class="social-icon" title="Twitter">tw</a>
+        </div>
+        <p class="copyright">© 2025 DS Films. All rights reserved.</p>
+    </footer>
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // --- Language toggle logic ---
+        const langToggleBtn = document.getElementById('lang-toggle-btn');
+        let currentLang = 'en';
+
+        // Extended dictionary for all visible texts
+        const translations = {
+            en: {
+                home: "Home",
+                portfolio: "Portfolio",
+                about: "About Us",
+                contact: "Contact",
+                viewWork: "View Our Work",
+                exploreProjects: "Explore Projects",
+                workWithUs: "Work With Us",
+                cinematic: "CINEMATIC EXCELLENCE",
+                storytelling: "VISUAL STORYTELLING",
+                award: "AWARD-WINNING FILMS",
+                portfolioTitle: "Our Portfolio",
+                filterAll: "All",
+                filterFilms: "Films",
+                filterCommercials: "Commercials",
+                filterDocumentaries: "Documentaries",
+                filterMusicVideos: "Music Videos",
+                lastJourney: "The Last Journey",
+                lastJourneyDesc: "Feature Film, 2024",
+                oceanView: "Ocean View Resort",
+                oceanViewDesc: "Commercial, 2024",
+                wildNature: "Wild Nature",
+                wildNatureDesc: "Documentary, 2023",
+                electricDreams: "Electric Dreams",
+                electricDreamsDesc: "Music Video, 2024",
+                midnightCity: "Midnight City",
+                midnightCityDesc: "Short Film, 2023",
+                urbanStyle: "Urban Style",
+                urbanStyleDesc: "Fashion Commercial, 2024",
+                aboutTitle: "About DS Films",
+                aboutP1: "HDS Films is a creative production company founded in 2015, specializing in high-quality film production across various formats. We bring stories to life through cinematic excellence and innovative visual storytelling.",
+                aboutP2: "With a team of passionate filmmakers, cinematographers, and editors, we've created award-winning content for clients worldwide. Our mission is to craft visual experiences that resonate with audiences and leave a lasting impression.",
+                aboutP3: "We believe in the power of visual storytelling to inspire, educate, and entertain. Every project we undertake is approached with creativity, technical expertise, and dedication to our craft.",
+                alexandra: "Alexandra Harris",
+                alexandraRole: "Creative Director",
+                david: "David Schmidt",
+                davidRole: "Head of Production",
+                sarah: "Sarah Winters",
+                sarahRole: "Cinematographer",
+                contactTitle: "Contact Us",
+                getInTouch: "Get In Touch",
+                contactP1: "We're always looking for new projects and collaborations.",
+                email: "Email: info@hdsfilms.com",
+                phone: "Phone: 919269882",
+                address: "Address: Leiria, Portugal",
+                name: "Name",
+                emailLabel: "Email",
+                subject: "Subject",
+                message: "Message",
+                sendMessage: "Send Message",
+                privacy: "Privacy Policy",
+                copyright: "© 2025 DS Films. All rights reserved."
+            },
+            pt: {
+                home: "Início",
+                portfolio: "Portfólio",
+                about: "Sobre Nós",
+                contact: "Contato",
+                viewWork: "Veja Nosso Trabalho",
+                exploreProjects: "Explorar Projetos",
+                workWithUs: "Trabalhe Conosco",
+                cinematic: "EXCELÊNCIA CINEMATOGRÁFICA",
+                storytelling: "NARRATIVA VISUAL",
+                award: "FILMES PREMIADOS",
+                portfolioTitle: "Nosso Portfólio",
+                filterAll: "Todos",
+                filterFilms: "Filmes",
+                filterCommercials: "Comerciais",
+                filterDocumentaries: "Documentários",
+                filterMusicVideos: "Videoclipes",
+                lastJourney: "A Última Jornada",
+                lastJourneyDesc: "Longa-metragem, 2024",
+                oceanView: "Resort Vista do Oceano",
+                oceanViewDesc: "Comercial, 2024",
+                wildNature: "Natureza Selvagem",
+                wildNatureDesc: "Documentário, 2023",
+                electricDreams: "Sonhos Elétricos",
+                electricDreamsDesc: "Videoclipe, 2024",
+                midnightCity: "Cidade da Meia-Noite",
+                midnightCityDesc: "Curta-metragem, 2023",
+                urbanStyle: "Estilo Urbano",
+                urbanStyleDesc: "Comercial de Moda, 2024",
+                aboutTitle: "Sobre a DS Films",
+                aboutP1: "A HDS Films é uma produtora criativa fundada em 2015, especializada em produção de filmes de alta qualidade em diversos formatos. Damos vida a histórias através da excelência cinematográfica e narrativa visual inovadora.",
+                aboutP2: "Com uma equipe apaixonada de cineastas, diretores de fotografia e editores, criamos conteúdos premiados para clientes em todo o mundo. Nossa missão é criar experiências visuais que ressoem com o público e deixem uma impressão duradoura.",
+                aboutP3: "Acreditamos no poder da narrativa visual para inspirar, educar e entreter. Cada projeto é realizado com criatividade, expertise técnica e dedicação ao nosso ofício.",
+                alexandra: "Alexandra Harris",
+                alexandraRole: "Diretora Criativa",
+                david: "David Schmidt",
+                davidRole: "Chefe de Produção",
+                sarah: "Sarah Winters",
+                sarahRole: "Diretora de Fotografia",
+                contactTitle: "Fale Conosco",
+                getInTouch: "Entre em Contato",
+                contactP1: "Estamos sempre em busca de novos projetos e colaborações.",
+                email: "Email: info@hdsfilms.com",
+                phone: "Telefone: 919269882",
+                address: "Endereço: Leiria, Portugal",
+                name: "Nome",
+                emailLabel: "Email",
+                subject: "Assunto",
+                message: "Mensagem",
+                sendMessage: "Enviar Mensagem",
+                privacy: "Política de Privacidade",
+                copyright: "© 2025 DS Films. Todos os direitos reservados."
+            }
+        };
+
+        function setLanguage(lang) {
+            // Nav links
+            const navLinksArr = document.querySelectorAll('.nav-link');
+            navLinksArr[0].textContent = translations[lang].home;
+            navLinksArr[1].textContent = translations[lang].portfolio;
+            navLinksArr[2].textContent = translations[lang].about;
+            navLinksArr[3].textContent = translations[lang].contact;
+
+            // Hero slide titles/buttons
+            document.querySelectorAll('.slide-title')[0].textContent = translations[lang].cinematic;
+            document.querySelectorAll('.slide-title')[1].textContent = translations[lang].storytelling;
+            document.querySelectorAll('.slide-title')[2].textContent = translations[lang].award;
+            document.getElementById('view-our-work-btn').textContent = translations[lang].viewWork;
+            document.querySelectorAll('.cta-button')[1].textContent = translations[lang].exploreProjects;
+            document.querySelectorAll('.cta-button')[2].textContent = translations[lang].workWithUs;
+
+            // Portfolio page
+            document.querySelector('.page-title').textContent = translations[lang].portfolioTitle;
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            filterBtns[0].textContent = translations[lang].filterAll;
+            filterBtns[1].textContent = translations[lang].filterFilms;
+            filterBtns[2].textContent = translations[lang].filterCommercials;
+            filterBtns[3].textContent = translations[lang].filterDocumentaries;
+            filterBtns[4].textContent = translations[lang].filterMusicVideos;
+
+            // Portfolio items
+            const portfolioItems = document.querySelectorAll('.portfolio-item');
+            if (portfolioItems.length >= 6) {
+                portfolioItems[0].querySelector('h3').textContent = translations[lang].lastJourney;
+                portfolioItems[0].querySelector('p').textContent = translations[lang].lastJourneyDesc;
+                portfolioItems[1].querySelector('h3').textContent = translations[lang].oceanView;
+                portfolioItems[1].querySelector('p').textContent = translations[lang].oceanViewDesc;
+                portfolioItems[2].querySelector('h3').textContent = translations[lang].wildNature;
+                portfolioItems[2].querySelector('p').textContent = translations[lang].wildNatureDesc;
+                portfolioItems[3].querySelector('h3').textContent = translations[lang].electricDreams;
+                portfolioItems[3].querySelector('p').textContent = translations[lang].electricDreamsDesc;
+                portfolioItems[4].querySelector('h3').textContent = translations[lang].midnightCity;
+                portfolioItems[4].querySelector('p').textContent = translations[lang].midnightCityDesc;
+                portfolioItems[5].querySelector('h3').textContent = translations[lang].urbanStyle;
+                portfolioItems[5].querySelector('p').textContent = translations[lang].urbanStyleDesc;
+            }
+
+            // About page
+            document.querySelector('#about .page-title').textContent = translations[lang].aboutTitle;
+            const aboutPs = document.querySelectorAll('.about-content p');
+            aboutPs[0].textContent = translations[lang].aboutP1;
+            aboutPs[1].textContent = translations[lang].aboutP2;
+            aboutPs[2].textContent = translations[lang].aboutP3;
+            const teamMembers = document.querySelectorAll('.team-member');
+            if (teamMembers.length >= 3) {
+                teamMembers[0].querySelector('h3').textContent = translations[lang].alexandra;
+                teamMembers[0].querySelector('p').textContent = translations[lang].alexandraRole;
+                teamMembers[1].querySelector('h3').textContent = translations[lang].david;
+                teamMembers[1].querySelector('p').textContent = translations[lang].davidRole;
+                teamMembers[2].querySelector('h3').textContent = translations[lang].sarah;
+                teamMembers[2].querySelector('p').textContent = translations[lang].sarahRole;
+            }
+
+            // Contact page
+            document.querySelector('#contact .page-title').textContent = translations[lang].contactTitle;
+            document.querySelector('.contact-info h3').textContent = translations[lang].getInTouch;
+            const contactPs = document.querySelectorAll('.contact-info p');
+            contactPs[0].textContent = translations[lang].contactP1;
+            contactPs[1].textContent = translations[lang].email;
+            contactPs[2].textContent = translations[lang].phone;
+            contactPs[3].textContent = translations[lang].address;
+            // Contact form labels and button
+            const formLabels = document.querySelectorAll('.contact-form label');
+            formLabels[0].textContent = translations[lang].name;
+            formLabels[1].textContent = translations[lang].emailLabel;
+            formLabels[2].textContent = translations[lang].subject;
+            formLabels[3].textContent = translations[lang].message;
+            document.querySelector('.submit-btn').textContent = translations[lang].sendMessage;
+
+            // Footer links
+            const footerLinks = document.querySelectorAll('.footer-links a');
+            footerLinks[0].textContent = translations[lang].home;
+            footerLinks[1].textContent = translations[lang].portfolio;
+            footerLinks[2].textContent = translations[lang].about;
+            footerLinks[3].textContent = translations[lang].contact;
+            footerLinks[4].textContent = translations[lang].privacy;
+            // Footer copyright
+            document.querySelector('footer p.copyright').textContent = translations[lang].copyright;
+
+            // Update button text
+            if (langToggleBtn) langToggleBtn.textContent = lang === 'en' ? 'EN' : 'PT';
+        }
+
+        if (langToggleBtn) {
+            langToggleBtn.addEventListener('click', function() {
+                currentLang = currentLang === 'en' ? 'pt' : 'en';
+                setLanguage(currentLang);
+            });
+        }
+
+        // Navigation active state
+        const navItems = document.querySelectorAll('.nav-link');
+        const pages = document.querySelectorAll('.page');
+        const navLinks = document.querySelector('.nav-links'); // <-- ADD THIS LINE
+
+        // Initial page setup - show home
+        document.addEventListener('DOMContentLoaded', function() {
+            // First, hide all pages except home
+            pages.forEach(page => {
+                page.style.display = 'none';
+            });
+            
+            // Show the home page initially
+            document.getElementById('home').style.display = 'block';
+            updateHomeFooterVisibility();
+        });
+        
+        // Handle navigation
+        navItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all nav items
+                navItems.forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // Get the target section id
+                const targetId = this.getAttribute('href');
+                
+                // Hide all pages
+                document.querySelectorAll('section').forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                // Show the target page
+                document.querySelector(targetId).style.display = 'block';
+                
+                // Close mobile menu if open
+                if (navLinks) navLinks.classList.remove('active'); // <-- FIX: prevent error if navLinks is undefined
+
+                // --- FIX: update home-active class correctly ---
+                if (targetId === "#home") {
+                    document.body.classList.add('home-active');
+                } else {
+                    document.body.classList.remove('home-active');
+                }
+                updateHomeFooterVisibility();
+            });
+        });
+        
+        // Portfolio filtering
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const portfolioItems = document.querySelectorAll('.portfolio-item');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Get the filter value
+                const filterValue = this.getAttribute('data-filter');
+                
+                // Filter portfolio items
+                portfolioItems.forEach(item => {
+                    const category = item.getAttribute('data-category');
+                    item.classList.remove('show');
+                    
+                    if (filterValue === 'all' || filterValue === category) {
+                        item.classList.add('show');
+                    }
+                });
+            });
+        });
+        
+        // --- Slider logic update for HTML5 video ---
+        const slides = document.querySelectorAll('.slide');
+        const sliderNext = document.querySelector('.slider-next');
+        const sliderPrev = document.querySelector('.slider-prev');
+        let currentSlide = 0;
+
+        function showSlide(n) {
+            slides.forEach((slide, idx) => {
+                slide.classList.remove('active');
+                // Pause all videos
+                const vid = slide.querySelector('video');
+                if (vid) {
+                    vid.pause();
+                    vid.currentTime = 0;
+                }
+            });
+
+            if (n >= slides.length) {
+                currentSlide = 0;
+            } else if (n < 0) {
+                currentSlide = slides.length - 1;
+            } else {
+                currentSlide = n;
+            }
+
+            slides[currentSlide].classList.add('active');
+            // Play the current slide's video
+            const activeVid = slides[currentSlide].querySelector('video');
+            if (activeVid) {
+                activeVid.play();
+            }
+            setHomeScrollListener();
+        }
+
+        sliderNext.addEventListener('click', function() {
+            showSlide(currentSlide + 1);
+        });
+
+        sliderPrev.addEventListener('click', function() {
+            showSlide(currentSlide - 1);
+        });
+
+        // Auto slide (optional)
+        let slideInterval = setInterval(function() {
+            showSlide(currentSlide + 1);
+        }, 16000); // changed from 8000 to 16000ms (16 seconds)
+
+        // Pause auto slide on hover/focus
+        document.querySelector('.slider-container').addEventListener('mouseenter', function() {
+            clearInterval(slideInterval);
+        });
+
+        document.querySelector('.slider-container').addEventListener('mouseleave', function() {
+            slideInterval = setInterval(function() {
+                showSlide(currentSlide + 1);
+            }, 16000); // match the new interval
+        });
+
+        // On page load, ensure only the first video plays
+        document.addEventListener('DOMContentLoaded', function() {
+            // First, hide all pages except home
+            pages.forEach(page => {
+                page.style.display = 'none';
+            });
+            
+            // Show the home page initially
+            document.getElementById('home').style.display = 'block';
+            
+            // Play only the first slide's video
+            slides.forEach((slide, idx) => {
+                const vid = slide.querySelector('video');
+                if (vid) {
+                    if (idx === 0) {
+                        vid.play();
+                    } else {
+                        vid.pause();
+                        vid.currentTime = 0;
+                    }
+                }
+            });
+
+            // --- View Our Work button scrolls to portfolio page ---
+            const viewWorkBtn = document.getElementById('view-our-work-btn');
+            const exploreProjectsBtn = document.getElementById('explore-projects-btn');
+            if (viewWorkBtn) {
+                viewWorkBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                    document.querySelector('.nav-link[href="#portfolio"]').classList.add('active');
+                    document.querySelectorAll('section').forEach(section => {
+                        section.style.display = 'none';
+                    });
+                    document.querySelector('#portfolio').style.display = 'block';
+                    if (navLinks) navLinks.classList.remove('active');
+                    document.body.classList.remove('home-active');
+                    updateHomeFooterVisibility();
+                });
+            }
+            if (exploreProjectsBtn) {
+                exploreProjectsBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                    document.querySelector('.nav-link[href="#portfolio"]').classList.add('active');
+                    document.querySelectorAll('section').forEach(section => {
+                        section.style.display = 'none';
+                    });
+                    document.querySelector('#portfolio').style.display = 'block';
+                    if (navLinks) navLinks.classList.remove('active');
+                    document.body.classList.remove('home-active');
+                    updateHomeFooterVisibility();
+                });
+            }
+        });
+
+        // Helper to check if home is active and update body class
+        function updateHomeFooterVisibility() {
+            const homeSection = document.getElementById('home');
+            if (homeSection && homeSection.style.display !== 'none') {
+                document.body.classList.add('home-active');
+            } else {
+                document.body.classList.remove('home-active');
+            }
+        }
+
+        // --- Only allow slide change on scroll when on home page ---
+        let lastScrollY = window.scrollY;
+        let wheelLock = false;
+        function handleHomeScroll(e) {
+            if (!document.body.classList.contains('home-active')) return;
+            if (wheelLock) return;
+            wheelLock = true;
+            let direction = e.deltaY > 0 ? 1 : -1;
+            showSlide(currentSlide + direction);
+            window.scrollTo(0, 0);
+            setTimeout(() => { wheelLock = false; }, 800); // lock for 800ms to prevent skipping
+            e.preventDefault();
+        }
+        function setHomeScrollListener() {
+            window.removeEventListener('wheel', handleHomeScroll, { passive: false });
+            if (document.body.classList.contains('home-active')) {
+                window.addEventListener('wheel', handleHomeScroll, { passive: false });
+            }
+        }
+
+        // Update scroll listener on navigation/page change
+        document.addEventListener('DOMContentLoaded', setHomeScrollListener);
+        navItems.forEach(item => {
+            item.addEventListener('click', setHomeScrollListener);
+        });
+        if (viewWorkBtn) {
+            viewWorkBtn.addEventListener('click', setHomeScrollListener);
+        }
+    </script>
+    <script>
+        // Make all footer navigation links work like header navigation
+        document.querySelectorAll('.footer-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                // Remove active class from all nav items
+                document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+                // Set corresponding nav-link as active
+                const navLink = document.querySelector(`.nav-link[href="${targetId}"]`);
+                if (navLink) navLink.classList.add('active');
+                // Hide all sections
+                document.querySelectorAll('section').forEach(section => section.style.display = 'none');
+                // Show the target section
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) targetSection.style.display = 'block';
+                // Update home-active class for footer visibility
+                if (targetId === "#home") {
+                    document.body.classList.add('home-active');
+                } else {
+                    document.body.classList.remove('home-active');
+                }
+                // Update scroll listener for home page
+                if (typeof setHomeScrollListener === "function") setHomeScrollListener();
+            });
+        });
+    </script>
+</body>
+</html>
